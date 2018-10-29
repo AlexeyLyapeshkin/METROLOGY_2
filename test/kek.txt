@@ -1,0 +1,14 @@
+if kek:
+    mem
+elif lol:
+    mom
+elif kek2:
+    pass
+if kek:
+    if kek:
+        if kek:
+            if kek:
+                mem
+            elif lol:
+                mem
+            elif lol:

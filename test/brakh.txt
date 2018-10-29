@@ -1,0 +1,327 @@
+import tkinter
+import Files
+import PIL.Image
+import PIL.ImageTk
+
+def cipherRail(key):
+    key = int(key)
+    kek = RailRoadHedge()
+    text = Files.ReadFromFile()
+    Files.WriteInFile(kek.Encode(key, kek.NormilizeText(text)))
+
+def DechipherRail(key):
+    kek = RailRoadHedge()
+    text = Files.ReadFromFile()
+    Files.WriteInFile(kek.Decode(key, text))
+
+def cipherVig(key):
+    key = str(key)
+    kek = Vigenere()
+    text = Files.ReadFromFile()
+
+    Files.WriteInFile(kek.encrypt(key, kek.NormilizeText(text)))
+
+def dechipherVig(key):
+    key = str(key)
+    kek = Vigenere()
+    text = Files.ReadFromFile()
+    Files.WriteInFile(kek.decrypt(key, kek.NormilizeText(text)))
+
+def PlayfairDE(mode):
+    kek = Playfair()
+    text = Files.ReadFromFile()
+    Files.WriteInFile(kek.encryptDecrypt(mode,kek.NormilizeText(text)))
+
+def MakeImage(path):
+
+    im = PIL.Image.open(path)
+    photo = PIL.ImageTk.PhotoImage(im)
+    label = tkinter.Label(Main_Window)
+    label.image = photo
+    label.place(x=650, y=280)
+
+def MakeMainWindow():
+
+    var = tkinter.IntVar()
+    rbutton1 = tkinter.Radiobutton(Main_Window)
+    rbutton1.place(x = 600, y = 600)
+    rbutton2 = tkinter.Radiobutton(Main_Window)
+    rbutton2.place(x = 600, y = 650)
+    rbutton3 = tkinter.Radiobutton(Main_Window)
+    rbutton3.place(x = 600, y = 700)
+    Button_Main = tkinter.Button(Main_Window, NewWindow(Main_Window,rbutton3,rbutton2,rbutton1,label,Button_Main, var))
+    Button_Main.place(x=730, y=760)
+
+    path = "img/kek2.png"
+    im = PIL.Image.open(path)
+    photo = PIL.ImageTk.PhotoImage(im)
+    label = tkinter.Label(Main_Window)
+    label.image = photo
+    label.place(x=650, y=280)
+
+def Choose(count, entry, m):
+    count = int(count)
+
+    if count == 1 and m == 'c':
+        cipherRail(entry)
+    if count == 1 and m == 'd':
+        DechipherRail(entry)
+    if count == 2 and m == 'c':
+        cipherVig(entry)
+    if count == 2 and m == 'd':
+        dechipherVig(entry)
+    if count == 3 :
+        PlayfairDE(m)
+
+def NewWindow(window,rb3,rb2,rb1,img,butt,var):
+
+    def Hide(lbl1,ent1,buttm,buttb,buttd):
+        lbl1.place_forget()
+        ent1.place_forget()
+        buttm.place_forget()
+        buttb.place_forget()
+        buttd.place_forget()
+        MakeMainWindow()
+
+    rb1.place_forget()
+    rb2.place_forget()
+    rb3.place_forget()
+    img.place_forget()
+    butt.place_forget()
+
+    Label_1 = tkinter.Label(window)
+    Label_1.place(x=700, y=600)
+
+    Key = tkinter.IntVar()
+    Entry_1 = tkinter.Entry(window)
+    Entry_1.configure(width = 20)
+    Entry_1.place(x=635, y=650)
+
+    if int(var.get()) == 3:
+        Entry_1.place_forget()
+        Label_1.place_forget()
+
+    kek = Entry_1.get()
+    Button_Main = tkinter.Button(window, Choose(var.get(),Entry_1.get(),'c'))
+    Button_Main.place(x=635, y=700)
+
+    Button_Dechipher = tkinter.Button(window, Choose(var.get(),Entry_1.get(),'d'))
+    Button_Dechipher.place(x=635, y=750)
+
+    Button_Back = tkinter.Button(window, Hide(Label_1,Entry_1,Button_Main,Button_Back,Button_Dechipher))
+    Button_Back.place(x=890, y=700)
+
+    path = "img/kek2.png"
+    im = PIL.Image.open(path)
+    photo = PIL.ImageTk.PhotoImage(im)
+    label = tkinter.Label(Main_Window)
+    label.image = photo
+    label.place(x=650, y=280)
+
+Main_Window = tkinter.Tk()
+Main_Window.geometry('1600x1000')
+Main_Window.title('Easy chiphers')
+path = "@kek2.xbm"
+Main_Window.iconbitmap(path)
+
+MakeMainWindow()
+
+Main_Window.mainloop()
+
+import string
+import re
+
+class Playfair():
+    def NormilizeText(self, text):
+        text = text.upper()
+        text = text.replace(' ', '')
+        return ''.join(c for c in text if c in string.ascii_letters)
+
+    def encryptDecrypt(self, mode, message, final=""):
+
+        addSymbol = 'X'
+
+        def regular(text):
+            template = "r[A-Z]{2}"
+            return re.findall(template, text)
+
+        matrixKey = [['C', 'R', 'Y', 'P', 'T']['O', 'G', 'A', 'H', 'B'],['D', 'E', 'F', 'I', 'K'],['L', 'M', 'N', 'Q', 'S'],['U', 'V', 'W', 'X', 'Z']]
+
+        if mode == 'c':
+
+            for index in range(len(message)):
+
+
+                if message[index] == 'J':
+                    message[index] = 'I'
+
+            for index in range(1, len(message)):
+
+                if message[index] == message[index - 1]:
+                    message.insert(index, addSymbol)
+
+            if len(message) % 2 != 0:
+                message.append(addSymbol)
+
+        binaryList = regular("".join(message))
+
+        for binary in range(len(binaryList)):
+
+            binaryList[binary] = list(binaryList[binary])
+            for indexString in range(len(matrixKey)):
+
+                for indexSymbol in range(len(matrixKey[indexString])):
+
+                    if binaryList[binary][0] == matrixKey[indexString][indexSymbol]:
+                        y0, x0 = indexString, indexSymbol
+
+                    if binaryList[binary][1] == matrixKey[indexString][indexSymbol]:
+                        y1, x1 = indexString, indexSymbol
+
+            for indexString in range(len(matrixKey)):
+
+                if matrixKey[y0][x0] in matrixKey[indexString] and matrixKey[y1][x1] in matrixKey[indexString]:
+
+                    if mode == 'd':
+                        x0 = x0 + 1 if x0 != 4 else 0
+                        x1 = x1 + 1 if x1 != 4 else 0
+                    else:
+                        x0 = x0 - 1 if x0 != 0 else 4
+                        x1 = x1 - 1 if x1 != 0 else 4
+
+            y0, y1 = y1, y0
+            binaryList[binary][0] = matrixKey[y0][x0]
+            binaryList[binary][1] = matrixKey[y1][x1]
+        for binary in range(len(binaryList)):
+            for symbol in binaryList[binary]:
+                final += symbol
+        return final
+
+import string
+
+class Vigenere():
+
+    def NormilizeText(self, N_text):
+
+        kek = 'ёйцукенгшщзхъфывапролджэячсмитьбю'
+        kek = set(kek)
+
+        N_text = N_text.lower()
+        N_text = N_text.replace(' ', '')
+        text = ''
+        for letter in N_text:
+            if letter in kek:
+                text += letter
+
+        return text
+
+    def encrypt(self, key, plaintext):
+        alph = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+        i = 0
+        while len(key) <= len(plaintext):
+            key += alph[alph.index(key[i]) + 1]
+            i += 1
+
+        ciphered = ''
+        for indx, chplain in enumerate(plaintext):
+            ciphered += alph[(alph.index(chplain)+alph.index(key[indx])) % 33]
+
+        return ciphered
+
+    def decrypt(self, key, ciphertext):
+        alph = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+        deciphered = ''
+        i = 0
+        while len(key) <= len(ciphertext):
+            key += alph[alph.index(key[i]) + 1]
+            i += 1
+        for indx, plain in enumerate(ciphertext):
+
+            deciphered += alph[(alph.index(plain) - alph.index(key[indx]) + 33) % 33]
+
+        return deciphered
+
+        import string
+
+class RailRoadHedge():
+
+    def NormilizeText(self, text):
+        text = text.lower()
+        text = text.replace(' ', '')
+        return ''.join(c for c in text if c in string.ascii_letters)
+
+    def Encode(self, key, E_text):
+
+        key = int(key)
+
+        if key == 0 or key == 1:
+            print('Roflanebalo')
+            return E_text
+        else:
+            key_rez = key
+            key_check = key
+            flag = True
+            k = 0
+            encodemessage = ''
+            while key_rez != 0:
+                while k < len(E_text):
+
+                    if key_rez == key_check:
+                        encodemessage += E_text[k]
+
+                    if key_check == 1:
+                        flag = False
+
+                    if key_check == key:
+                        flag = True
+
+                    if flag == True:
+                        key_check = key_check - 1
+                    else:
+                        key_check = key_check + 1
+
+                    k += 1
+                key_rez -= 1
+                key_check = key_rez
+                k = key - key_rez
+
+            print(encodemessage)
+            return encodemessage
+
+    def Decode(self, key, D_text):
+
+        def Distance(self, size, row, iteration):
+            if ((size == 0) or (size == 1)):
+                return 1
+
+            if ((row == 0) or (row == size - 1)):
+                return (size - 1) * 2
+
+            if (iteration % 2 == 0):
+                return (size - 1 - row) * 2
+
+            return 2 * row
+
+        key = int(key)
+
+        if key < 0:
+            print("Error")
+        else:
+            decodedmessage = ''
+            CurrPosition = 0
+            row = 0
+            word_list = list(D_text)
+            while row < key:
+                iter = 0
+                i = row
+                while i < len(D_text):
+                    word_list[i] = D_text[CurrPosition]
+                    CurrPosition += 1
+                    i = i + Distance(self, key, row, iter)
+                    iter += 1
+                row += 1
+            for letter in word_list:
+                decodedmessage += letter
+
+            print(decodedmessage)
+            return decodedmessage
